@@ -38,6 +38,14 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ---------------------------------------------------------------------------------------------------
 # AppDev tutorial 101
+- Create next project.
+- Pages and Layouts.
+  - Create a nested routes.
+  - Create Web Template example.
+- Nesting Layouts.  
+- Dynamic Routes.
+- Route Handlers.
+- Middleware.
 ---------------------------------------------------------------------------------------------------
 # npx create-next-app@latest
 Need to install the following packages:
@@ -106,7 +114,7 @@ export default page
 
 
 ---------------------------------------------------------------------------------------------------
-2) Crate Web Template example.
+2) Create Web Template example.
 ---------------------------------------------------------------------------------------------------
 2.1) Create "HeaderPage.jsx" on "app\Components\WebTemplate\HeaderPage.jsx"
 ***************************************************************************************************
@@ -155,9 +163,9 @@ import FooterPage from "./Components/WebTemplate/FooterPage";
 
 
 ---------------------------------------------------------------------------------------------------
-3) Nesting Layouts
+3) Nesting Layouts.
 ---------------------------------------------------------------------------------------------------
-3.1) Create layout.jsx
+3.1) Create layout.jsx to "app/RouteDemo/layout.jsx"
 ***************************************************************************************************
 export default function RouteDemoLayout({
     children,
@@ -212,7 +220,7 @@ Footer Page
 
 
 ---------------------------------------------------------------------------------------------------
-4) Dynamic Routes
+4) Dynamic Routes.
 ---------------------------------------------------------------------------------------------------
 4.1.1) A Dynamic Segment can be created by wrapping a folder's name 
 in square brackets: [folderName]. For example, [id] or [name].
@@ -266,7 +274,7 @@ const AllUsers = ({ params }) => {
 export default AllUsers
 ***************************************************************************************************
 
-4...2) Test show all users result : http://localhost:3000/Users/AppDev1/AppDev2/AppDev3
+4.2.2) Test show all users result : http://localhost:3000/Users/AppDev1/AppDev2/AppDev3
 
 Header Page
 .............................
@@ -276,4 +284,90 @@ AppDev3
 .............................
 Footer Page
 
+---------------------------------------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------------------------------------
+5) Route Handlers.
+---------------------------------------------------------------------------------------------------
+5.1.1) Route Handlers allow you to create custom request handlers for a given route using the Web Request and Response APIs.
+
+- Create folder and file by "app/API/Users/route.jsx"
+***************************************************************************************************
+export async function GET() {
+
+	console.log("##### Test API as server. [http://localhost:3000/API/Users] #####");
+
+    const res = await fetch('https://669890d82069c438cd6f2242.mockapi.io/userInfo', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    const data = await res.json()
+   
+    return Response.json({ data })
+  }
+***************************************************************************************************
+
+5.1.2) Test get all users api : http://localhost:3000/API/Users
+
+---------------------------------------------------------------------------------------------------
+
+5.2.1) Dynamic Route Segments : Route Handlers can use Dynamic Segments to create request handlers from dynamic data.
+
+- Create folder and file by "app/API/User/[id]/route.jsx"
+***************************************************************************************************
+export async function GET(request, { params }) {
+
+    console.log("##### Test API as server. [http://localhost:3000/API/User/XXX] #####");
+
+    const userId = params.id;
+    const res = await fetch(`https://669890d82069c438cd6f2242.mockapi.io/userInfo/${userId}`, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    const data = await res.json()
+
+    return Response.json({ data })
+}
+***************************************************************************************************
+
+5.2.2) Test get all users api : http://localhost:3000/API/User/10
+---------------------------------------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------------------------------------
+6) Middleware.
+---------------------------------------------------------------------------------------------------
+Middleware คือส่วนของ code ที่จะ run ก่อนที่ request จะทำงานเสร็จ
+- สามารถที่จะ rewriting, redirecting, modifying ตัว request, response ก่อนที่จะไปถึงตำแหน่งจริงๆได้
+กฎคือ สร้างไฟล์ชื่อ middleware.js ไว้ที่ root project (level เดียวกันกับ app) = ได้ middleware แล้วเรียบร้อย
+
+6.1) Create middleware.js in the root project
+***************************************************************************************************
+import { NextResponse } from "next/server";
+
+// This function can be marked `async` if using `await` inside
+export function middleware(request) {
+    console.log("##### [middlware] To do something before call API #####");
+
+    const nextUrl = request.nextUrl
+    //console.log("nextUrl : ", nextUrl);
+
+    if (nextUrl.pathname === "/getUsers"){
+        return NextResponse.redirect(new URL("/API/Users", request.url));
+    }else{
+        return NextResponse.next();
+    }
+}
+
+export const config = {
+    matcher: ["/getUsers/:path*", '/getUser/:path*',]
+};
+***************************************************************************************************
+
+6.2) Test get all users api : http://localhost:3000/getUsers
 ---------------------------------------------------------------------------------------------------
