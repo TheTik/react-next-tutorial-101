@@ -46,6 +46,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - Dynamic Routes.
 - Route Handlers.
 - Middleware.
+- Rendering : Server/Client component.
+- Loading UI and Streaming.
 ---------------------------------------------------------------------------------------------------
 # npx create-next-app@latest
 Need to install the following packages:
@@ -309,9 +311,7 @@ export async function GET() {
     return Response.json({ data })
   }
 ***************************************************************************************************
-
 5.1.2) Test get all users api : http://localhost:3000/API/Users
-
 ---------------------------------------------------------------------------------------------------
 
 5.2.1) Dynamic Route Segments : Route Handlers can use Dynamic Segments to create request handlers from dynamic data.
@@ -333,7 +333,6 @@ export async function GET(request, { params }) {
     return Response.json({ data })
 }
 ***************************************************************************************************
-
 5.2.2) Test get all users api : http://localhost:3000/API/User/10
 ---------------------------------------------------------------------------------------------------
 
@@ -368,6 +367,120 @@ export const config = {
     matcher: ["/getUsers/:path*", '/getUser/:path*',]
 };
 ***************************************************************************************************
-
 6.2) Test get all users api : http://localhost:3000/getUsers
+---------------------------------------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------------------------------------
+7) Rendering : Server/Client component.
+---------------------------------------------------------------------------------------------------
+7.1.1) Server : Create folder and file by "app/FetchData/Server/page.jsx"
+***************************************************************************************************
+import React from 'react'
+
+async function getUsers() {
+    var response = [];
+    try {
+        response = await fetch("https://669890d82069c438cd6f2242.mockapi.io/userInfo");
+        if (!response.ok) {
+            throw new Error('Cannot fetch users data.');
+        }
+        return response.json();
+    } catch (error) {
+        console.log('Error : ', error);
+    }
+}
+
+const page = async () => {
+
+    const users = await getUsers();
+    console.log("Users : ", users);
+
+    return (
+        <div>
+            <h3>Run as Server</h3>
+            <ul>
+                {users.map(user => (
+                    <li key={user.id}>{user.id}:{user.name}</li>
+                )
+                )}
+            </ul>
+        </div>
+    )
+}
+
+export default page
+***************************************************************************************************
+7.1.2) Test get all users api : http://localhost:3000/FetchData/Server
+---------------------------------------------------------------------------------------------------
+
+7.2.1) Client : Create folder and file by "app/FetchData/Client/page.jsx"
+***************************************************************************************************
+"use client"
+
+import React from 'react'
+import { useState, useEffect } from 'react'
+
+const page = () => {
+
+    const [users, setUsers] = useState([]);
+
+    async function getUsers() {
+        try {
+            await fetch("https://669890d82069c438cd6f2242.mockapi.io/userInfo")
+                .then((res) => res.json())  // Current is native brower => paser JSON response into native JavaScript objects.
+                .then((res) => {
+                    setUsers(res);
+                });
+        } catch (error) {
+            console.log('Error : ', error);
+        }
+    }
+
+    useEffect(() => {
+        getUsers();
+    }, []);
+    console.log(users);
+    // !!! react App rendering twice !!!
+    // Edit file "next.config.mjs" for disable reactStrictMode
+    // const nextConfig = {
+    //     reactStrictMode: false
+    // };
+
+    return (
+        <div>
+            <h3>Run as Client</h3>
+            <ul>
+                {users.map(user => (
+                    <li key={user.id}>{user.id}:{user.name}</li>
+                )
+                )}
+            </ul>
+        </div>
+    )
+}
+
+export default page
+***************************************************************************************************
+7.2.2) Test get all users api : http://localhost:3000/FetchData/Client
+---------------------------------------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------------------------------------
+8) Loading UI and Streaming.
+---------------------------------------------------------------------------------------------------
+The special file loading.js helps you create meaningful Loading UI with "React Suspense". With this convention, 
+you can show an instant loading state from the server while the content of a route segment loads. 
+The new content is automatically swapped in once rendering is complete.
+
+8.1) Copy "app/FetchData/Server" to "app/FetchData/ServerLoading"
+8.2) Create file : "app/FetchData/ServerLoading/loading.js"
+***************************************************************************************************
+export default function Loding(){
+    return <div>Loding...</div>
+}
+***************************************************************************************************
+8.3) Test page render by : http://localhost:3000/FetchData/ServerLoading and pass Ctrl + F5
 ---------------------------------------------------------------------------------------------------
