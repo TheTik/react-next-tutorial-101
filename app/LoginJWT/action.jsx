@@ -54,9 +54,9 @@ async function login(prevState, formData) {
                                 .setIssuedAt()
                                 .setExpirationTime('1h') // Token expires in 1 hour
                                 .sign(secretKey);
-        console.log("token : ", token);                                
+        console.log("cookieAuth : ", token);                                
 
-        cookies().set('token', token);
+        cookies().set('cookieAuth', token);
         // Check in you Browser : F12 -> Application -> find you "token" cookies
         // or https://jwt.io/
 
@@ -70,7 +70,7 @@ export default login
 
 
 /*
-Add Error500 component : "/app/Error500/page.jsx"
+1) Add Error500 component : "/app/Error500/page.jsx"
 ***************************************************************************************************
 import React from 'react'
 
@@ -81,6 +81,27 @@ const page = () => {
 }
 ***************************************************************************************************
 
+2) Test middlware send response header data on root page.js
+***************************************************************************************************
+import { headers } from 'next/headers'
+
+export default function Home() {
+
+  const headersList = headers()
+  const user = JSON.parse(headersList.get('user'))
+  //console.log("user : ", user);
+
+  return (
+    <>
+      Hello World !!!
+      <h5>{user.email}</h5>
+    </>
+  );
+}
+***************************************************************************************************
+
+3) Edit middleware.js
+***************************************************************************************************
 export default page
 ...
 import { jwtVerify, importJWK } from 'jose'
@@ -90,7 +111,8 @@ export async function middleware(request) {  // !!! add async mode
 ...    
     // Check JWT authorize
     try {
-        let token = request.cookies.get('token')
+        let token = request.cookies.get('cookieAuth')
+        if(typeof token === "undefined") return NextResponse.next();
 
         const secretJWK = {
             kty: 'oct',
@@ -104,6 +126,14 @@ export async function middleware(request) {  // !!! add async mode
         const { payload } = await jwtVerify(token.value, secretKey)
         const requestHeaders = new Headers(request.headers)
         requestHeaders.set('user', JSON.stringify({ email: payload.email }))
+
+        const response = NextResponse.next({
+            request:{
+                headers: requestHeaders,
+            },
+        });
+        return response;
+
     } catch (error) {
         console.log('error', error)
         return NextResponse.redirect(new URL('/Error500', request.url))
@@ -112,6 +142,7 @@ export async function middleware(request) {  // !!! add async mode
 }
 ...
 export const config = {
-    matcher: ["/getUsers/:path*", '/getUser/:path*','/checkAuth/:path*'] // !!! add '/checkAuth/:path*'
+    matcher: ["/:path*","/getUsers/:path*", '/getUser/:path*']
 };
+***************************************************************************************************
 */

@@ -7,10 +7,11 @@ export async function middleware(request) {
     console.log("##### [middlware] To do something before call API #####");
 
 
-    
-    // Check JWT authorize
+
+    // Check JWT authorize 
     try {
-        let token = request.cookies.get('token')
+        let token = request.cookies.get('cookieAuth')
+        if(typeof token === "undefined") return NextResponse.next();
 
         const secretJWK = {
             kty: 'oct',
@@ -24,6 +25,14 @@ export async function middleware(request) {
         const { payload } = await jwtVerify(token.value, secretKey)
         const requestHeaders = new Headers(request.headers)
         requestHeaders.set('user', JSON.stringify({ email: payload.email }))
+
+        const response = NextResponse.next({
+            request:{
+                headers: requestHeaders,
+            },
+        });
+        return response;
+
     } catch (error) {
         console.log('error', error)
         return NextResponse.redirect(new URL('/Error500', request.url))
@@ -42,5 +51,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ["/getUsers/:path*", '/getUser/:path*','/checkAuth/:path*']
+    matcher: ["/:path*","/getUsers/:path*", '/getUser/:path*']
 };
