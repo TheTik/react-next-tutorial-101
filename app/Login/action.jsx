@@ -23,25 +23,24 @@ async function login(prevState, formData) {
     // [Step 5]
     const email = formData.get('email');
     const password = formData.get('password');
-    console.log("Email : ", email);
-    console.log("Password : ", password);
+    //console.log("Email : ", email);
+    //console.log("Password : ", password);
 
     // [Step 6]
     const users = await getUsers();
     //console.log(users);
 
-    const user = users.filter((x) => {
-        console.log(x.email);
-        if ((x.email === email) && (x.phoneNumber == password)){ 
-            return x; 
+    const user = users.filter((f) => {
+        if ((f.email === email) && (f.phoneNumber == password)) {
+            return f;
         }
-    });    
+    });
     //console.log("user : ", user);
 
-    if (user.length > 0) { 
-        return { message : 'Login Successful.'}
-    }else{
-        return { message : 'User name or password incorrect. !'}
+    if (user.length > 0) {
+        return { message: 'Login Successful.' }
+    } else {
+        return { message: 'User name or password incorrect. !' }
     }
 }
 

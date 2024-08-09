@@ -49,6 +49,12 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - Rendering : Server/Client component.
 - Loading UI and Streaming.
 - Server Action.
+- UserCRUD 
+    - UserList run as server.
+    - UserEdit run as client.
+- Login 
+    - action : bz-login run as server.
+    - page : login ui run as client.    
 ---------------------------------------------------------------------------------------------------
 # npx create-next-app@latest
 Need to install the following packages:
@@ -90,6 +96,9 @@ Success! Created react-next-tutorial-101 at "react-next-tutorial-101"
 1) Change directory to "react-next-tutorial-101"
 2) Edit "page.js" file to "eact-next-tutorial-101\app\page.js"
 ---------------------------------------------------------------------------------------------------
+
+Packet install
+# npm install jose
 
 
 
@@ -341,6 +350,7 @@ export async function GET(request, { params }) {
 
 ---------------------------------------------------------------------------------------------------
 6) Middleware.
+Test : http://localhost:3000/getUsers
 ---------------------------------------------------------------------------------------------------
 Middleware คือส่วนของ code ที่จะ run ก่อนที่ request จะทำงานเสร็จ
 - สามารถที่จะ rewriting, redirecting, modifying ตัว request, response ก่อนที่จะไปถึงตำแหน่งจริงๆได้
@@ -375,6 +385,7 @@ export const config = {
 
 ---------------------------------------------------------------------------------------------------
 7) Rendering : Server/Client component.
+Test : http://localhost:3000/FetchData/Client
 ---------------------------------------------------------------------------------------------------
 7.1.1) Server : Create folder and file by "app/FetchData/Server/page.jsx"
 ***************************************************************************************************
@@ -471,6 +482,7 @@ export default page
 
 ---------------------------------------------------------------------------------------------------
 8) Loading UI and Streaming.
+Test : http://localhost:3000/FetchData/ServerLoading and pass Ctrl + F5
 ---------------------------------------------------------------------------------------------------
 The special file loading.js helps you create meaningful Loading UI with "React Suspense". With this convention, 
 you can show an instant loading state from the server while the content of a route segment loads. 
@@ -490,6 +502,7 @@ export default function Loding(){
 
 ---------------------------------------------------------------------------------------------------
 9) Server Action.
+Test : http://localhost:3000/ServerAction
 ---------------------------------------------------------------------------------------------------
 9.1) Create folder and file by "app/ServerAction/page.jsx"
 ***************************************************************************************************
@@ -573,6 +586,7 @@ AppBaseUrl : http://localhost:3000/ServerAction
 10) UserCRUD 
 - UserList run as server.
 - UserEdit run as client.
+Test : http://localhost:3000/UserCRUD/Server/UserList
 ---------------------------------------------------------------------------------------------------
 10.1) Server : Create folder and file by "/app/UserCRUD/Server/UserList/page.jsx"
 # rafce 
@@ -821,3 +835,103 @@ export default function Loading() {
   }
 ***************************************************************************************************
 
+---------------------------------------------------------------------------------------------------
+11) Login 
+- action : bz-login run as server.
+- page : login ui run as client.
+Test : http://localhost:3000/Login
+---------------------------------------------------------------------------------------------------
+11.1) Client : Create folder and file by "/app/Login/page.jsx"
+***************************************************************************************************
+// [Step 1]
+'use client'
+
+// [Step 2] #rafce
+import React from 'react'
+
+// [Step 6]
+import login from './action'
+
+// [Step 4]
+import { useFormState, useFormStatus } from 'react-dom'
+
+const page = () => {
+
+    // [Step 6]
+    const initialState = {
+        message: null,
+    }
+
+    // [Step 5]
+    const [state, formAction] = useFormState(login, initialState) 
+    // login is server function, matcher login : prevState
+
+    // [Step 7]
+    return (
+        <div>
+            <form action={formAction}>
+                <div>Email <input name="email" /></div>
+                <div>Password <input name="password" type="password" /></div>
+                <button>Login</button>
+                <div>
+                    System Message : {state?.message}
+                </div>
+            </form>
+        </div>
+    )
+}
+
+export default page
+***************************************************************************************************
+11.2) Server : Create folder and file by "/app/Login/action.jsx"
+***************************************************************************************************
+// [Step 1]
+'use server'
+
+// [Step 2] # rafce
+import React from 'react'
+
+async function getUsers() {
+    var response = [];
+    try {
+        response = await fetch("https://669890d82069c438cd6f2242.mockapi.io/userInfo");
+        if (!response.ok) {
+            throw new Error('Cannot fetch users data.');
+        }
+        return response.json();
+    } catch (error) {
+        console.log('Error : ', error);
+    }
+}
+
+// [Step 3] change code : const action = () => { : async function login (prevState, formData) {
+async function login(prevState, formData) {
+
+    // [Step 5]
+    const email = formData.get('email');
+    const password = formData.get('password');
+    console.log("Email : ", email);
+    console.log("Password : ", password);
+
+    // [Step 6]
+    const users = await getUsers();
+    //console.log(users);
+
+    const user = users.filter((x) => {
+        console.log(x.email);
+        if ((x.email === email) && (x.phoneNumber == password)){ 
+            return x; 
+        }
+    });    
+    //console.log("user : ", user);
+
+    if (user.length > 0) { 
+        return { message : 'Login Successful.'}
+    }else{
+        return { message : 'User name or password incorrect. !'}
+    }
+}
+
+// [Step 4]
+export default login
+***************************************************************************************************
