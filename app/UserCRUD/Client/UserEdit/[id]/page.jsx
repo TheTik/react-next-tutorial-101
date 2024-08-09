@@ -100,9 +100,9 @@ export const page = ({ params }) => {
                 placeholder="Phone Number"
                 className="mb-4 w-full rounded border p-2"
             />
-            {/* {message && <div className={isError ? "text-red-500" : "text-green-500"}>{message}</div>} */}
 
             <br />
+            
             <button onClick={handleSave} className="rounded bg-green-500 px-4 py-2 text-white">
                 Save
             </button>

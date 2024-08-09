@@ -565,4 +565,259 @@ export async function submitForm(formData)
 }
 ***************************************************************************************************
 9.3) Test by enter you data and click on "Submit" button and then check you data on server teminal.
+AppBaseUrl : http://localhost:3000/ServerAction
 ---------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+10) UserCRUD 
+- UserList run as server.
+- UserEdit run as client.
+---------------------------------------------------------------------------------------------------
+10.1) Server : Create folder and file by "/app/UserCRUD/Server/UserList/page.jsx"
+# rafce 
+***************************************************************************************************
+import React from 'react'
+
+[Step 1]
+import Link from 'next/link'
+import { revalidatePath } from "next/cache";
+
+[Step 2]
+async function getUsers() {
+    var response = [];
+    try {
+        response = await fetch("https://669890d82069c438cd6f2242.mockapi.io/userInfo");
+        if (!response.ok) {
+            throw new Error('Cannot fetch users data.');
+        }
+        return response.json();
+    } catch (error) {
+        console.log('Error : ', error);
+    }
+}
+
+[Step 3]
+async function deleteUser(id) {
+    var response = null;
+    try {
+        const requestOptions = {
+            method: "DELETE",
+            headers: { 'Content-Type': 'application/json' },
+            redirect: "follow"
+        };
+
+        response = await fetch(`https://669890d82069c438cd6f2242.mockapi.io/userInfo/${id}`, requestOptions);
+        if (!response.ok) {
+            throw new Error('Cannot fetch users data.');
+        }
+        return response.json();
+    } catch (error) {
+        console.log('Error : ', error);
+    }
+}
+
+const page = async () => {
+
+[Step 4]
+    const users = await getUsers();
+    //console.log("Users : ", users);
+
+[Step 6]
+    const handleDelete = async (data) => {
+        "use server";
+
+        const userId = data.get("userId");
+        //console.log("userId : ", userId);
+
+        const result = await deleteUser(userId);
+        //console.log("Result : ", result);
+        if (typeof (result) !== 'undefined') {
+            revalidatePath("/UserCRUD/Server/UserList");
+        }
+    };
+
+[Step 5]
+   return (
+        <div className="container mx-auto p-4">
+            <h3 className="mb-4 text-lg font-semibold">User List</h3>
+            {users.map((user) => (
+                <div key={user.id} className="flex items-center justify-between border-b py-2">
+                    <div>
+                        <p>Id: {user.id}</p>
+                        <p>Name: {user.name}</p>
+                        <p>Email: {user.email}</p>
+                        <p>Phone: {user.phoneNumber}</p>
+                    </div>
+                    <div>
+
+                        <form action={handleDelete}>
+
+                            <input name="userId" type="hidden" value={user.id} />
+                            <button type="submit" className="mr-2 rounded bg-red-500 px-3 py-1 text-white">Delete</button>
+
+                            <Link href={`/UserCRUD/Client/UserEdit/${user.id}`}>
+                                <button className="rounded bg-blue-500 px-3 py-1 text-white">Edit</button>
+                            </Link>
+
+                        </form>
+
+                    </div>
+                    <hr />
+                </div>
+            ))}
+        </div>
+    )
+}
+
+export default page
+
+***************************************************************************************************
+
+10.2) Client : Create folder and file by "/app/UserCRUD/Client/UserEdit/[id]/page.jsx"
+# rafce 
+***************************************************************************************************
+[Step 1]
+"use client"
+
+import React, { useState, useEffect } from 'react'
+
+[Step 2]
+async function getUser(id) {
+    let response = null;
+    try {
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+        };
+
+        response = await fetch(`https://669890d82069c438cd6f2242.mockapi.io/userInfo/${id}`, requestOptions);
+        if (!response.ok) {
+            throw new Error('Cannot fetch user data.');
+        }
+        return response.json();
+    } catch (error) {
+        console.log('Error : ', error);
+    }
+}
+
+[Step 3]
+async function updateUser(raw) {
+    let response = null;
+    try {
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(raw),
+        };
+
+        response = await fetch(`https://669890d82069c438cd6f2242.mockapi.io/userInfo/${raw.id}`, requestOptions);
+        if (!response.ok) {
+          throw new Error('Cannot fetch user data.');
+        }
+        return response.json();
+    } catch (error) {
+        console.log('Error : ', error);
+    }
+}
+
+
+export const page = ({ params }) => {
+
+[Step4]
+    const id = params.id;
+
+    const [user, setUser] = useState({
+        name: "",
+        email: "",
+        phoneNumber: "",
+    });
+	
+[Step 5]	
+    const getUserById = async (id) => {
+        try {
+            const response = await getUser(id);
+            setUser(response);
+        } catch (error) { console.log('error', error); }
+    }
+	
+[Step 6]
+    useEffect(() => {
+        getUserById(id);
+    }, [id]);
+	
+
+[Step 8]
+    const handleChange = (e) => {
+        //console.log([e.target.name],e.target.value);
+        setUser({ ...user, [e.target.name]: e.target.value });
+    };
+
+
+[Step 9]
+    const handleSave = async () => {
+        const result = await updateUser(user);        
+        if (typeof (result) !== 'undefined') {
+            alert("Data has been save..");
+        }
+    };
+
+
+[Step 7]
+    return (
+        <div className="container mx-auto p-4">
+            <input
+                type="text"
+                name="name"
+                value={user.name}
+                onChange={handleChange}
+                placeholder="Name"
+                className="mb-2 w-full rounded border p-2"
+            />
+            <br />
+            <input
+                type="email"
+                name="email"
+                value={user.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="mb-2 w-full rounded border p-2"
+            />
+            <br />
+            <input
+                type="text"
+                name="phoneNumber"
+                value={user.phoneNumber}
+                onChange={handleChange}
+                placeholder="Phone Number"
+                className="mb-4 w-full rounded border p-2"
+            />
+
+            <br />
+            
+            <button onClick={handleSave} className="rounded bg-green-500 px-4 py-2 text-white">
+                Save
+            </button>
+        </div>
+    )
+
+}
+
+export default page
+
+***************************************************************************************************
+
+10.4) Server : Create loading.jsx file by "/app/UserCRUD/Server/UserList/loading.jsx"
+***************************************************************************************************
+export default function Loading() {
+    return <div>UserList Loading... </div>
+  }
+***************************************************************************************************
+
+10.5) Client : Create loading.jsx file by "/app/UserCRUD/Client/UserEdit/[id]/page.jsx"
+***************************************************************************************************
+export default function Loading() {
+    return <div>UserEdit Loading... </div>
+  }
+***************************************************************************************************
+
