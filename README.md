@@ -248,7 +248,7 @@ import React from 'react'
 const page = ({ params }) => {
   return (
     <div>
-      Id: {params.Id} <br />
+      Id: {params.id} <br />
       Name: {params.name}
     </div>
   )
@@ -270,7 +270,7 @@ Footer Page
 4.2.1) Catch-all Segments
 Dynamic Segments can be extended to catch-all subsequent segments by adding an ellipsis inside the brackets [...folderName].
 
-- Create folder and file by "app/Users/[...AllUser]/page.jsx"
+- Create folder and file by "app/Users/[...AllUsers]/page.jsx"
 ***************************************************************************************************
 "use client"
 
@@ -594,9 +594,8 @@ Test : http://localhost:3000/UserCRUD/Server/UserList
 ---------------------------------------------------------------------------------------------------
 10.1) Server : Create folder and file by "/app/UserCRUD/Server/UserList/page.jsx"
 # rafce 
-***************************************************************************************************
-import React from 'react'
 
+***************************************************************************************************
 [Step 1]
 import Link from 'next/link'
 import { revalidatePath } from "next/cache";
@@ -856,21 +855,21 @@ import React from 'react'
 // [Step 6]
 import login from './action'
 
-// [Step 4]
+// [Step 3]
 import { useFormState, useFormStatus } from 'react-dom'
 
 const page = () => {
 
-    // [Step 6]
+    // [Step 5]
     const initialState = {
         message: null,
     }
 
-    // [Step 5]
+    // [Step 4]
     const [state, formAction] = useFormState(login, initialState) 
     // login is server function, matcher login : prevState
 
-    // [Step 7]
+    // [Step 6]
     return (
         <div>
             <form action={formAction}>
@@ -922,7 +921,7 @@ async function login(prevState, formData) {
     //console.log(users);
 
     const user = users.filter((x) => {
-        console.log(x.email);
+        //console.log(x.email);
         if ((x.email === email) && (x.phoneNumber == password)){ 
             return x; 
         }

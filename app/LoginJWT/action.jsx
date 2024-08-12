@@ -70,6 +70,10 @@ export default login
 
 
 /*
+***************************************************************************************************
+Next ...
+***************************************************************************************************
+
 1) Add Error500 component : "/app/Error500/page.jsx"
 ***************************************************************************************************
 import React from 'react'
@@ -81,27 +85,11 @@ const page = () => {
 }
 ***************************************************************************************************
 
-2) Test middlware send response header data on root page.js
+2) Edit middleware.js
 ***************************************************************************************************
-import { headers } from 'next/headers'
-
-export default function Home() {
-
-  const headersList = headers()
-  const user = JSON.parse(headersList.get('user'))
-  //console.log("user : ", user);
-
-  return (
-    <>
-      Hello World !!!
-      <h5>{user.email}</h5>
-    </>
-  );
-}
+!!! Importance !!! add this parameter into  "/:path*"  matcher
 ***************************************************************************************************
 
-3) Edit middleware.js
-***************************************************************************************************
 export default page
 ...
 import { jwtVerify, importJWK } from 'jose'
@@ -144,5 +132,29 @@ export async function middleware(request) {  // !!! add async mode
 export const config = {
     matcher: ["/:path*","/getUsers/:path*", '/getUser/:path*']
 };
+***************************************************************************************************
+
+3) Test middlware send response header data on root page.js
+***************************************************************************************************
+// [Step 1]
+import { headers } from 'next/headers'
+
+export default function Home() {
+
+  // [Step 2]
+  const headersList = headers()
+  let user = JSON.parse(headersList.get('user'))
+  if (user == null){
+    user = { email: 'Access Denied' }
+  }
+
+  return (
+    <>
+      // [Step 3]
+      Hello World !!!
+      <h5>Email Authentication : {user.email}</h5>
+    </>
+  );
+}
 ***************************************************************************************************
 */
