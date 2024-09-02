@@ -112,6 +112,7 @@ export async function middleware(request) {  // !!! add async mode
 
         const secretKey = await importJWK(secretJWK, 'HS256')
         const { payload } = await jwtVerify(token.value, secretKey)
+        
         const requestHeaders = new Headers(request.headers)
         requestHeaders.set('user', JSON.stringify({ email: payload.email }))
 

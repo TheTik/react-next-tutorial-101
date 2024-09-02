@@ -1,4 +1,4 @@
-import React from 'react'
+'use server'
 
 async function getUsers() {
     var response = [];

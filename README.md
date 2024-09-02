@@ -134,6 +134,8 @@ export default page
 ---------------------------------------------------------------------------------------------------
 2.1) Create "HeaderPage.jsx" on "app\Components\WebTemplate\HeaderPage.jsx"
 ***************************************************************************************************
+'use client'
+
 import React from 'react'
 
 const HeaderPage = () => {
@@ -147,6 +149,8 @@ export default HeaderPage
 
 2.1) Create "FooterPage.jsx" on "app\Components\WebTemplate\FooterPage.jsx"
 ***************************************************************************************************
+'use client'
+
 import React from 'react'
 
 const FooterPage = () => {
@@ -243,6 +247,8 @@ in square brackets: [folderName]. For example, [id] or [name].
 
 - Create folder and file by "app/User/[id]/[name]/page.jsx"
 ***************************************************************************************************
+'use client'
+
 import React from 'react'
 
 const page = ({ params }) => {
@@ -311,19 +317,21 @@ Footer Page
 
 - Create folder and file by "app/API/Users/route.jsx"
 ***************************************************************************************************
+'use server'
+
 export async function GET() {
 
-	console.log("##### Test API as server. [http://localhost:3000/API/Users] #####");
+    console.log("##### Test API as server. [http://localhost:3000/API/Users] #####");
 
     const res = await fetch('https://669890d82069c438cd6f2242.mockapi.io/userInfo', {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+        headers: {
+            'Content-Type': 'application/json',
+        },
     })
     const data = await res.json()
-   
+
     return Response.json({ data })
-  }
+}
 ***************************************************************************************************
 5.1.2) Test get all users api : http://localhost:3000/API/Users
 ---------------------------------------------------------------------------------------------------
@@ -332,6 +340,8 @@ export async function GET() {
 
 - Create folder and file by "app/API/User/[id]/route.jsx"
 ***************************************************************************************************
+'use server'
+
 export async function GET(request, { params }) {
 
     console.log("##### Test API as server. [http://localhost:3000/API/User/XXX] #####");
@@ -393,7 +403,7 @@ Test : http://localhost:3000/FetchData/Client
 ---------------------------------------------------------------------------------------------------
 7.1.1) Server : Create folder and file by "app/FetchData/Server/page.jsx"
 ***************************************************************************************************
-import React from 'react'
+'use server'
 
 async function getUsers() {
     var response = [];
@@ -866,7 +876,7 @@ const page = () => {
     }
 
     // [Step 4]
-    const [state, formAction] = useFormState(login, initialState) 
+    const [state, formAction] = useFormState(login, initialState);
     // login is server function, matcher login : prevState
 
     // [Step 6]
@@ -913,8 +923,10 @@ async function login(prevState, formData) {
     // [Step 5]
     const email = formData.get('email');
     const password = formData.get('password');
+    console.log("------------------------------------");
     console.log("Email : ", email);
     console.log("Password : ", password);
+    console.log("------------------------------------");
 
     // [Step 6]
     const users = await getUsers();
@@ -938,3 +950,16 @@ async function login(prevState, formData) {
 // [Step 4]
 export default login
 ***************************************************************************************************
+
+Deploy 
+
+1) Download URL Rewrite Module 2.1 : https://www.iis.net/downloads/microsoft/url-rewrite
+2) Add Website...
+3) Double click on URL Rewrite
+   - Add Rule(s)
+   - Revers Proxy and clike OK
+   - Inbound Rules ()=> Enter the server name or the IP address where HTTP request will be forwarded. example : "localhost:300"
+4) Edit Permissions ... click right on you site....
+   - Add user IUSR : Full control
+   - Add user IIS_USRS : Full control
+   
